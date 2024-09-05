@@ -3,8 +3,8 @@ import Counter from "./Components/Counter";
 import ClassCounter from "./Components/ClassCounter";
 import "./styles/App.css";
 import PostList from "./Components/PostList";
-import MyButton from "./Components/UI/Buttons/MyButton";
-import MyInput from "./Components/UI/Inputs/MyInput";
+import PostForm from "./Components/PostFrom";
+import MySelect from "./Components/UI/Selects/MySelect";
 
 function App() {
   const [value, setValue] = useState("Текст в инпуте");
@@ -22,20 +22,23 @@ function App() {
     { id: 4, title: "Unity", body: "Description" },
   ]);
 
-  const [title, setTitle] = useState("");
-  const [body, setBody] = useState("");
   // const bodyInputRef = useRef();
 
-  function addNewPost(e) {
-    e.preventDefault();
-    const newPost = {
-      id: Date.now(),
-      title: title,
-      body: body,
-    };
+  const [selectedSort, setSelectedSort] = useState("");
 
+  const createPost = (newPost) => {
     setPosts([...posts, newPost]);
-  }
+  };
+
+  // получаем элемент из дочернего компонента
+  const removePost = (post) => {
+    setPosts(posts.filter((p) => p.id !== post.id));
+  };
+
+  const sortPosts = (sort) => {
+    setSelectedSort(sort);
+    console.log(sort);
+  };
 
   return (
     <div className="App">
@@ -46,29 +49,33 @@ function App() {
         type="text"
         value={value}
         onChange={(event) => setValue(event.target.value)}
-        style={{ marginBottom: 50 }}
+        style={{ marginBottom: "50px" }}
       />
 
-      <form>
-        {/* Управляемый компонент */}
-        <MyInput
-          type="text"
-          value={title}
-          placeholder="Название поста"
-          onChange={(e) => setTitle(e.target.value)}
-        />
-        <MyInput
-          type="text"
-          value={body}
-          placeholder="Название поста"
-          onChange={(e) => setBody(e.target.value)}
-        />
-        {/* Неуправляемый компонент */}
-        {/* <MyInput type="text" placeholder="Описание поста" ref={bodyInputRef} /> */}
-        <MyButton onClick={addNewPost}>Создать пост</MyButton>
-      </form>
+      <PostForm create={createPost} />
 
-      <PostList posts={posts} title={"Посты по языкам программирования"} />
+      <div style={{ marginBottom: "35px" }}>
+        <MySelect
+          value={selectedSort}
+          onChange={sortPosts}
+          defaultValue="Сортировка"
+          options={[
+            { value: "title", name: "По названию" },
+            { value: "body", name: "По описанию" },
+          ]}
+        />
+      </div>
+
+      {posts.length !== 0 ? (
+        <PostList
+          posts={posts}
+          title={"Посты по языкам программирования"}
+          remove={removePost}
+        />
+      ) : (
+        <h2 style={{ textAlign: "center" }}>Посты не найдены!</h2>
+      )}
+
       <PostList posts={posts2} title={"Посты по фреймворкам"} />
     </div>
   );
