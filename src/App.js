@@ -1,8 +1,11 @@
-import React, { useState, useMemo } from "react";
+import React, { useState, useEffect } from "react";
+import { usePosts } from "./hooks/usePosts";
+import PostService from "./API/PostService";
 import Counter from "./Components/Counter";
 import ClassCounter from "./Components/ClassCounter";
 import "./styles/App.css";
 import PostList from "./Components/PostList";
+import Loader from "./Components/UI/Loader/Loader";
 import PostForm from "./Components/PostFrom";
 import PostFilter from "./Components/PostFilter";
 import MyModal from "./Components/UI/Modals/MyModal";
@@ -28,25 +31,19 @@ function App() {
 
   const [filter, setFilter] = useState({ sort: "", query: "" });
   const [modal, setModal] = useState(false);
+  const sortedAndSearchPosts = usePosts(posts, filter.sort, filter.query);
+  const [isPostLoading, setIsPostLoading] = useState(false);
 
-  const sortedPosts = useMemo(() => {
-    console.log("Отработала фукция sortPosts");
-    if (filter.sort) {
-      return [...posts].sort((a, b) =>
-        a[filter.sort].localeCompare(b[filter.sort])
-      );
-    } else {
-      return posts;
-    }
-  }, [filter.sort, posts]);
+  async function fetchPosts() {
+    setIsPostLoading(true);
+    setTimeout(async () => {
+      const posts = await PostService.getAll();
+      setPosts(posts);
+      setIsPostLoading(false);
+    }, 1000);
+  }
 
-  const sortedAndSearchPosts = useMemo(() => {
-    return sortedPosts.filter(
-      (post) =>
-        post.title.toLowerCase().includes(filter.query.toLowerCase()) ||
-        post.body.toLowerCase().includes(filter.query.toLowerCase())
-    );
-  }, [filter.query, sortedPosts]);
+  useEffect(() => fetchPosts(), []);
 
   const createPost = (newPost) => {
     setPosts([...posts, newPost]);
@@ -57,10 +54,6 @@ function App() {
   const removePost = (post) => {
     setPosts(posts.filter((p) => p.id !== post.id));
   };
-
-  // const sortPosts = (sort) => {
-  //   setSelectedSort(sort);
-  // };
 
   return (
     <div className="App">
@@ -74,6 +67,8 @@ function App() {
         style={{ marginBottom: "50px" }}
       />
 
+      <button onClick={() => fetchPosts()}>GET POSTS</button>
+
       <MyModal visible={modal} setVisible={setModal}>
         <PostForm create={createPost} />
       </MyModal>
@@ -83,12 +78,23 @@ function App() {
       </MyButton>
 
       <PostFilter filter={filter} setFilter={setFilter} />
-
-      <PostList
-        posts={sortedAndSearchPosts}
-        title={"Посты по языкам программирования"}
-        remove={removePost}
-      />
+      {isPostLoading ? (
+        <div
+          style={{
+            display: "flex",
+            justifyContent: "center",
+            marginTop: "50px",
+          }}
+        >
+          <Loader />
+        </div>
+      ) : (
+        <PostList
+          posts={sortedAndSearchPosts}
+          title={"Посты по языкам программирования"}
+          remove={removePost}
+        />
+      )}
 
       <PostList posts={posts2} title={"Посты по фреймворкам"} />
     </div>
