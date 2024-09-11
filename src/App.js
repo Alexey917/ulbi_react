@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { usePosts } from "./hooks/usePosts";
+import { useFetching } from "./hooks/useFetching";
 import PostService from "./API/PostService";
 import Counter from "./Components/Counter";
 import ClassCounter from "./Components/ClassCounter";
@@ -32,16 +33,16 @@ function App() {
   const [filter, setFilter] = useState({ sort: "", query: "" });
   const [modal, setModal] = useState(false);
   const sortedAndSearchPosts = usePosts(posts, filter.sort, filter.query);
-  const [isPostLoading, setIsPostLoading] = useState(false);
+  const [limit, setLimit] = useState(10);
+  const [page, setPage] = useState(1);
+  const [totalCount, setTotalCount] = useState(0);
 
-  async function fetchPosts() {
-    setIsPostLoading(true);
-    setTimeout(async () => {
-      const posts = await PostService.getAll();
-      setPosts(posts);
-      setIsPostLoading(false);
-    }, 1000);
-  }
+  const [fetchPosts, isPostLoading, postError] = useFetching(async () => {
+    const response = await PostService.getAll(limit, page);
+    setPosts(response.data);
+    console.log(response.headers["x-total-count"]);
+    setTotalCount(response.headers["x-total-count"]);
+  });
 
   useEffect(() => fetchPosts(), []);
 
@@ -78,6 +79,7 @@ function App() {
       </MyButton>
 
       <PostFilter filter={filter} setFilter={setFilter} />
+      {postError && <h2>Произошла ошибка ${postError}</h2>}
       {isPostLoading ? (
         <div
           style={{
