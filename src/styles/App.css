@@ -35,3 +35,19 @@
   transform: translateX(-550px);
   transition: all 500ms;
 }
+
+.page__wrapper {
+  display: flex;
+  margin-top: 30px;
+}
+
+.page {
+  padding: 10px;
+  border: 1px solid teal;
+  cursor: pointer;
+}
+
+.page__current {
+  border: 2px solid orange;
+  font-weight: bold;
+}

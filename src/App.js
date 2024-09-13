@@ -11,6 +11,9 @@ import PostForm from "./Components/PostFrom";
 import PostFilter from "./Components/PostFilter";
 import MyModal from "./Components/UI/Modals/MyModal";
 import MyButton from "./Components/UI/Buttons/MyButton";
+import getPageCount from "./utils/pages";
+import getPagesArray from "./utils/pagesArray";
+import Pagination from "./Components/UI/Pagination/Pagination";
 
 function App() {
   const [value, setValue] = useState("Текст в инпуте");
@@ -33,18 +36,26 @@ function App() {
   const [filter, setFilter] = useState({ sort: "", query: "" });
   const [modal, setModal] = useState(false);
   const sortedAndSearchPosts = usePosts(posts, filter.sort, filter.query);
+  const [totalPages, setTotalPages] = useState(0);
   const [limit, setLimit] = useState(10);
   const [page, setPage] = useState(1);
-  const [totalCount, setTotalCount] = useState(0);
 
   const [fetchPosts, isPostLoading, postError] = useFetching(async () => {
     const response = await PostService.getAll(limit, page);
     setPosts(response.data);
-    console.log(response.headers["x-total-count"]);
-    setTotalCount(response.headers["x-total-count"]);
+    const totalCount = response.headers["x-total-count"];
+    setTotalPages(getPageCount(totalCount, limit));
   });
 
-  useEffect(() => fetchPosts(), []);
+  const changePage = (page) => {
+    setPage(page);
+  };
+
+  console.log(totalPages);
+
+  useEffect(() => {
+    fetchPosts();
+  }, [page]);
 
   const createPost = (newPost) => {
     setPosts([...posts, newPost]);
@@ -97,7 +108,7 @@ function App() {
           remove={removePost}
         />
       )}
-
+      <Pagination totalPages={totalPages} page={page} changePage={changePage} />
       <PostList posts={posts2} title={"Посты по фреймворкам"} />
     </div>
   );
