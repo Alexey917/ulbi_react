@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from "react";
+import React, { useState } from "react";
 import Counter from "./Components/Counter";
 import ClassCounter from "./Components/ClassCounter";
 import "./styles/App.css";
@@ -7,6 +7,8 @@ import PostForm from "./Components/PostFrom";
 import PostFilter from "./Components/PostFilter";
 import MyModal from "./Components/UI/Modals/MyModal";
 import MyButton from "./Components/UI/Buttons/MyButton";
+import { usePosts } from "./hooks/usePosts";
+import axios from "axios";
 
 function App() {
   const [value, setValue] = useState("Текст в инпуте");
@@ -24,29 +26,19 @@ function App() {
     { id: 4, title: "Unity", body: "Description" },
   ]);
 
+  async function fetchPosts() {
+    const response = await axios.get(
+      "https://jsonplaceholder.typicode.com/posts"
+    );
+    setPosts(response.data);
+  }
+
   // const bodyInputRef = useRef();
 
   const [filter, setFilter] = useState({ sort: "", query: "" });
   const [modal, setModal] = useState(false);
 
-  const sortedPosts = useMemo(() => {
-    console.log("Отработала фукция sortPosts");
-    if (filter.sort) {
-      return [...posts].sort((a, b) =>
-        a[filter.sort].localeCompare(b[filter.sort])
-      );
-    } else {
-      return posts;
-    }
-  }, [filter.sort, posts]);
-
-  const sortedAndSearchPosts = useMemo(() => {
-    return sortedPosts.filter(
-      (post) =>
-        post.title.toLowerCase().includes(filter.query.toLowerCase()) ||
-        post.body.toLowerCase().includes(filter.query.toLowerCase())
-    );
-  }, [filter.query, sortedPosts]);
+  const sortedAndSearchPosts = usePosts(posts, filter.sort, filter.query);
 
   const createPost = (newPost) => {
     setPosts([...posts, newPost]);
@@ -77,6 +69,8 @@ function App() {
       <MyModal visible={modal} setVisible={setModal}>
         <PostForm create={createPost} />
       </MyModal>
+
+      <button onClick={fetchPosts}>GET POSTS</button>
 
       <MyButton style={{ marginTop: "30px" }} onClick={() => setModal(true)}>
         Создать пост
