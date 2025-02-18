@@ -1,6 +1,5 @@
 import { useMemo } from "react";
 
-<<<<<<< HEAD
 export function useSortedPosts(posts, methodOfSort) {
   const sortedPosts = useMemo(() => {
     console.log("Отработала фукция sortPosts");
@@ -17,23 +16,6 @@ export function useSortedPosts(posts, methodOfSort) {
 
 export function usePosts(posts, methodOfSort, query) {
   const sortedPosts = useSortedPosts(posts, methodOfSort);
-=======
-export const useSortedPosts = (posts, sort) => {
-  const sortedPosts = useMemo(() => {
-    console.log("Отработала фукция sortPosts");
-    if (sort) {
-      return [...posts].sort((a, b) => a[sort].localeCompare(b[sort]));
-    } else {
-      return posts;
-    }
-  }, [sort, posts]);
-
-  return sortedPosts;
-};
-
-export const usePosts = (posts, sort, query) => {
-  const sortedPosts = useSortedPosts(posts, sort);
->>>>>>> 7791ac3e224513ebb01cacdd9a12e199574741df
   const sortedAndSearchPosts = useMemo(() => {
     return sortedPosts.filter(
       (post) =>
@@ -43,8 +25,4 @@ export const usePosts = (posts, sort, query) => {
   }, [query, sortedPosts]);
 
   return sortedAndSearchPosts;
-<<<<<<< HEAD
 }
-=======
-};
->>>>>>> 7791ac3e224513ebb01cacdd9a12e199574741df

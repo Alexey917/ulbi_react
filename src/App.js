@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import Counter from "./Components/Counter";
 import ClassCounter from "./Components/ClassCounter";
 import "./styles/App.css";
@@ -25,6 +25,10 @@ function App() {
     { id: 3, title: "Unreal Engine", body: "Description" },
     { id: 4, title: "Unity", body: "Description" },
   ]);
+
+  useEffect(() => {
+    fetchPosts();
+  }, [])
 
   async function fetchPosts() {
     const response = await axios.get(
